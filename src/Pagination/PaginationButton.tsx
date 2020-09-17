@@ -51,19 +51,12 @@ class PaginationButton extends React.Component<PaginationButtonProps> {
       [addPrefix('active')]: active,
       [addPrefix('disabled')]: disabled
     });
-
-    const itemProps = {
-      ...unhandled,
-      disabled,
-      onClick: createChainedFunction(onClick, this.handleClick)
-    };
-
-    if (Component !== SafeAnchor && typeof Component !== 'string') {
-      itemProps.active = active;
-    }
-
     const item = (
-      <Component {...itemProps}>
+      <Component
+        {...unhandled}
+        disabled={disabled}
+        onClick={createChainedFunction(onClick, this.handleClick)}
+      >
         {children}
         <Ripple />
       </Component>

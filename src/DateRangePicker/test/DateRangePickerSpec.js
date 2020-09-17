@@ -72,9 +72,9 @@ describe('DateRangePicker', () => {
     const doneOp = () => {
       done();
     };
-
-    const instance = getInstance(<DateRangePicker onChange={doneOp} />);
-    instance.updateValue([new Date(), new Date()]);
+    let demo;
+    getDOMNode(<DateRangePicker onChange={doneOp} ref={ref => (demo = ref)} />);
+    demo.updateValue([new Date(), new Date()]);
   });
 
   it('Should call onClean callback', done => {
@@ -99,18 +99,36 @@ describe('DateRangePicker', () => {
   });
 
   it('Should call `onOpen` callback', done => {
-    const doneOp = () => {
+    const doneOp = key => {
       done();
     };
-    const picker = getInstance(<DateRangePicker onOpen={doneOp} />);
+    let picker = null;
+    getDOMNode(
+      <DateRangePicker
+        ref={ref => {
+          picker = ref;
+        }}
+        onOpen={doneOp}
+      />
+    );
+
     picker.open();
   });
 
   it('Should call `onClose` callback', done => {
-    const doneOp = () => {
+    const doneOp = key => {
       done();
     };
-    const picker = getInstance(<DateRangePicker defaultOpen onClose={doneOp} />);
+    let picker = null;
+    getDOMNode(
+      <DateRangePicker
+        defaultOpen
+        ref={ref => {
+          picker = ref;
+        }}
+        onClose={doneOp}
+      />
+    );
     picker.close();
   });
 
@@ -211,18 +229,5 @@ describe('DateRangePicker', () => {
 
     assert.ok(picker.querySelector('div[title="2019-01-01"]'));
     assert.ok(picker.querySelector('div[title="2019-09-01"]'));
-  });
-
-  it('Should have only one calendar', () => {
-    const instance = getInstance(<DateRangePicker showOneCalendar open />);
-    const menuContainer = getDOMNode(instance.menuContainerRef.current);
-
-    assert.ok(
-      menuContainer
-        .querySelector('.rs-picker-daterange-panel')
-        .className.match(/\brs-picker-daterange-panel-show-one-calendar\b/)
-    );
-
-    assert.equal(menuContainer.querySelectorAll('.rs-picker-daterange-calendar-single').length, 1);
   });
 });

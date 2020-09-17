@@ -175,7 +175,7 @@ class InputAutosize extends React.Component<InputAutosizeProps, InputAutosizeSta
       ...inputStyle
     };
 
-    const [htmlInputProps] = partitionHTMLProps(this.props);
+    let [htmlInputProps] = partitionHTMLProps(this.props);
 
     htmlInputProps.className = inputClassName;
     htmlInputProps.id = inputId;

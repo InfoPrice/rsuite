@@ -13,13 +13,10 @@ export interface CarouselProps extends StandardProps {
   autoplayInterval?: number;
 
   /** Button placement */
-  placement?: 'top' | 'bottom' | 'left' | 'right';
+  placement: 'top' | 'bottom' | 'left' | 'right';
 
   /** Button shape */
-  shape?: 'dot' | 'bar';
-
-  /** Carousel elements */
-  children: React.ReactNode;
+  shape: 'dot' | 'bar';
 }
 
 declare const Col: React.ComponentType<CarouselProps>;

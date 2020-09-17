@@ -12,7 +12,7 @@ class ModalFooter extends React.Component<ModalFooterProps> {
   };
   render() {
     const { classPrefix, className, ...props } = this.props;
-    const classes = classNames(classPrefix, className);
+    let classes = classNames(classPrefix, className);
     return <div {...props} className={classes} />;
   }
 }

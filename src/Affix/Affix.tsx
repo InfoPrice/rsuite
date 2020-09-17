@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { on, getOffset } from 'dom-lib';
 import bindElementResize, { unbind as unbindElementResize } from 'element-resize-event';
-import { defaultProps, getUnhandledProps } from '../utils';
+import { defaultProps } from '../utils';
 import { AffixProps } from './Affix.d';
 
 interface Offset {
@@ -17,77 +17,56 @@ interface Offset {
 interface AffixState {
   offset?: Offset;
   fixed?: boolean;
-  containerOffset?: Offset;
 }
 
 class Affix extends React.Component<AffixProps, AffixState> {
   static propTypes = {
     top: PropTypes.number,
-    onChange: PropTypes.func,
-    container: PropTypes.oneOfType([PropTypes.object, PropTypes.func])
+    onChange: PropTypes.func
   };
 
   static defaultProps = {
     top: 0
   };
 
-  mountRef: React.RefObject<any> = null;
+  containerRef: React.RefObject<any> = null;
   scrollListener = null;
 
   constructor(props) {
     super(props);
     this.state = {
       offset: null,
-      fixed: false,
-      containerOffset: null
+      fixed: false
     };
-    this.mountRef = React.createRef();
+    this.containerRef = React.createRef();
   }
 
   componentDidMount() {
-    this.updateMountNodeOffset();
+    this.setContainerOffset();
     this.scrollListener = on(window, 'scroll', this.updatePosition);
-    bindElementResize(this.mountRef.current, this.updateMountNodeOffset);
+    bindElementResize(this.containerRef.current, this.setContainerOffset);
   }
 
   componentWillUnmount() {
     if (this.scrollListener) {
       this.scrollListener.off();
     }
-    if (this.mountRef.current) {
-      unbindElementResize(this.mountRef.current);
+    if (this.containerRef.current) {
+      unbindElementResize(this.containerRef.current);
     }
   }
-  getContainerOffset = () => {
-    const { container } = this.props;
-    const { containerOffset: offset } = this.state;
-    if (offset) {
-      return offset;
-    }
 
-    const node = typeof container === 'function' ? container() : container;
-    const containerOffset = node ? getOffset(node) : null;
-    this.setState({ containerOffset });
-
-    return containerOffset;
-  };
-
-  updateMountNodeOffset = () => {
+  setContainerOffset = () => {
     this.setState(() => {
-      return { offset: getOffset(this.mountRef.current) };
+      return { offset: getOffset(this.containerRef.current) };
     });
   };
 
   updatePosition = () => {
-    const { offset } = this.state;
+    const offset = this.state.offset;
     const { top, onChange } = this.props;
     const scrollY = window.scrollY || window.pageYOffset;
-    const containerOffset = this.getContainerOffset();
-    let fixed = scrollY - (offset.top - top) >= 0;
-
-    if (containerOffset) {
-      fixed = fixed && scrollY < containerOffset.top + containerOffset.height;
-    }
+    const fixed = scrollY - (offset.top - top) >= 0;
 
     if (fixed !== this.state.fixed) {
       this.setState({ fixed });
@@ -96,9 +75,9 @@ class Affix extends React.Component<AffixProps, AffixState> {
   };
 
   render() {
-    const { classPrefix, children, top, ...rest } = this.props;
+    const { classPrefix, children, top, className, style } = this.props;
     const { fixed, offset } = this.state;
-    const classes = classNames({
+    const classes = classNames(className, {
       [classPrefix]: fixed
     });
 
@@ -109,19 +88,18 @@ class Affix extends React.Component<AffixProps, AffixState> {
           top,
           left: offset.left,
           width: offset.width,
-          zIndex: 10
+          zIndex: 10,
+          ...style
         }
-      : null;
-
-    const unhandledProps = getUnhandledProps(Affix, rest);
+      : style;
 
     return (
-      <div ref={this.mountRef} {...unhandledProps}>
-        <div className={classes} style={affixStyle}>
+      <React.Fragment>
+        <div className={classes} style={affixStyle} ref={this.containerRef}>
           {children}
         </div>
         {fixed && <div aria-hidden="true" style={placeholderStyles}></div>}
-      </div>
+      </React.Fragment>
     );
   }
 }

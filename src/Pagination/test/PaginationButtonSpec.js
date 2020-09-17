@@ -40,7 +40,7 @@ describe('PaginationButton', () => {
   });
 
   it('Should output a custom item', () => {
-    const instance = getDOMNode(
+    let instance = getDOMNode(
       <PaginationButton
         renderItem={() => {
           return <span>custom</span>;
@@ -48,27 +48,6 @@ describe('PaginationButton', () => {
       />
     );
     assert.include(instance.querySelector('span').innerText, 'custom');
-  });
-
-  it('Custom elements can get the active prop', () => {
-    const activeInstance = getDOMNode(
-      <PaginationButton
-        active
-        componentClass={({ active }) => {
-          return <span>{active ? 'active' : 'inactive'}</span>;
-        }}
-      />
-    );
-    const inactiveInstance = getDOMNode(
-      <PaginationButton
-        active={false}
-        componentClass={({ active }) => {
-          return <span>{active ? 'active' : 'inactive'}</span>;
-        }}
-      />
-    );
-    assert.equal(activeInstance.querySelector('span').innerText, 'active');
-    assert.equal(inactiveInstance.querySelector('span').innerText, 'inactive');
   });
 
   it('Should have a custom className', () => {

@@ -1,29 +1,30 @@
 import React from 'react';
-import { getDOMNode } from '@test/testUtils';
+import { findDOMNode } from 'react-dom';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import ModalFooter from '../ModalFooter';
 
 describe('ModalFooter', () => {
   it('Should render a modal footer', () => {
-    const title = 'Test';
-    const instance = getDOMNode(<ModalFooter>{title}</ModalFooter>);
-    assert.equal(instance.className, 'rs-modal-footer');
-    assert.equal(instance.innerHTML, title);
+    let title = 'Test';
+    let instance = ReactTestUtils.renderIntoDocument(<ModalFooter>{title}</ModalFooter>);
+    assert.equal(findDOMNode(instance).className, 'rs-modal-footer');
+    assert.equal(findDOMNode(instance).innerHTML, title);
   });
 
   it('Should have a custom className', () => {
-    const instance = getDOMNode(<ModalFooter className="custom" />);
-    assert.include(instance.className, 'custom');
+    let instance = ReactTestUtils.renderIntoDocument(<ModalFooter className="custom" />);
+    assert.include(findDOMNode(instance).className, 'custom');
   });
 
   it('Should have a custom style', () => {
     const fontSize = '12px';
-    const instance = getDOMNode(<ModalFooter style={{ fontSize }} />);
-    assert.equal(instance.style.fontSize, fontSize);
+    let instance = ReactTestUtils.renderIntoDocument(<ModalFooter style={{ fontSize }} />);
+    assert.equal(findDOMNode(instance).style.fontSize, fontSize);
   });
 
   it('Should have a custom className prefix', () => {
-    const instance = getDOMNode(<ModalFooter classPrefix="custom-prefix" />);
-    assert.ok(instance.className.match(/\bcustom-prefix\b/));
+    const instance = ReactTestUtils.renderIntoDocument(<ModalFooter classPrefix="custom-prefix" />);
+    assert.ok(findDOMNode(instance).className.match(/\bcustom-prefix\b/));
   });
 });

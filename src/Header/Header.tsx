@@ -1,6 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import setDisplayName from 'recompose/setDisplayName';
 
 import { defaultProps } from '../utils';
 import { HeaderProps } from './Header.d';
@@ -17,6 +18,8 @@ class Header extends React.Component<HeaderProps> {
   }
 }
 
-export default defaultProps<HeaderProps>({
+const EnhancedHeader = defaultProps<HeaderProps>({
   classPrefix: 'header'
 })(Header);
+
+export default setDisplayName('Header')(EnhancedHeader);

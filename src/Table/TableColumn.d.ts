@@ -7,7 +7,7 @@ export interface TableColumnProps {
   /** Vertical alignment */
   verticalAlign?: 'top' | 'middle' | 'bottom';
 
-  /** Column width */
+  /** 	Column width */
   width?: number;
 
   /** Fixed column */
@@ -30,9 +30,6 @@ export interface TableColumnProps {
 
   /** Callback function for resize the colum */
   onResize?: (columnWidth?: number, dataKey?: string) => void;
-
-  /**A column of a tree */
-  treeCol?: boolean;
 }
 
 declare const TableColumn: React.ComponentType<TableColumnProps>;

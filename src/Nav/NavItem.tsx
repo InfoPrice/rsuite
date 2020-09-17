@@ -1,16 +1,23 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import setDisplayName from 'recompose/setDisplayName';
 
 import SafeAnchor from '../SafeAnchor';
+import Tooltip from '../Tooltip';
+import Whisper from '../Whisper';
 import Ripple from '../Ripple';
-import appendTooltip from '../utils/appendTooltip';
 
 import { createChainedFunction, defaultProps, prefix, getUnhandledProps } from '../utils';
 import { NavItemProps } from './NavItem.d';
 
+const addTooltip = (children, tip) => (
+  <Whisper speaker={<Tooltip>{tip}</Tooltip>} placement="right">
+    {children}
+  </Whisper>
+);
+
 class NavItem extends React.Component<NavItemProps> {
-  static displayName = 'NavItem';
   static propTypes = {
     active: PropTypes.bool,
     disabled: PropTypes.bool,
@@ -107,16 +114,16 @@ class NavItem extends React.Component<NavItemProps> {
     }
 
     return (
-      <li className={classes} style={style}>
-        {hasTooltip
-          ? appendTooltip({ children: item, message: children, placement: 'right' })
-          : item}
+      <li role="presentation" className={classes} style={style}>
+        {hasTooltip ? addTooltip(item, children) : item}
       </li>
     );
   }
 }
 
-export default defaultProps<NavItemProps>({
+const EnhancedNavItem = defaultProps<NavItemProps>({
   classPrefix: 'nav-item',
   componentClass: SafeAnchor
 })(NavItem);
+
+export default setDisplayName('NavItem')(EnhancedNavItem);

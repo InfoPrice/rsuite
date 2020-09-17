@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import _ from 'lodash';
 import compose from 'recompose/compose';
 
-import IntlContext from '../IntlProvider/IntlContext';
+import IntlProvider from '../IntlProvider';
 import withLocale from '../IntlProvider/withLocale';
 import FileItem from './UploadFileItem';
 import UploadTrigger from './UploadTrigger';
@@ -58,8 +58,7 @@ class Uploader extends React.Component<UploaderProps, UploaderState> {
     toggleComponentClass: PropTypes.elementType,
     renderFileInfo: PropTypes.func,
     removable: PropTypes.bool,
-    fileListVisible: PropTypes.bool,
-    draggable: PropTypes.bool
+    fileListVisible: PropTypes.bool
   };
   static defaultProps = {
     autoUpload: true,
@@ -178,43 +177,28 @@ class Uploader extends React.Component<UploaderProps, UploaderState> {
     this.cleanInputValue();
   }
 
-  handleAjaxUploadSuccess = (
-    file: FileType,
-    response: object,
-    event: React.SyntheticEvent<any>,
-    xhr: XMLHttpRequest
-  ) => {
+  handleAjaxUploadSuccess = (file: FileType, response: object, event) => {
     const nextFile: FileType = {
       ...file,
       status: 'finished',
       progress: 100
     };
     this.updateFileList(nextFile, () => {
-      this.props.onSuccess?.(response, nextFile, event, xhr);
+      this.props.onSuccess?.(response, nextFile, event);
     });
   };
 
-  handleAjaxUploadError = (
-    file: FileType,
-    status: object,
-    event: React.SyntheticEvent<any>,
-    xhr: XMLHttpRequest
-  ) => {
+  handleAjaxUploadError = (file: FileType, status: object, event) => {
     const nextFile: FileType = {
       ...file,
       status: 'error'
     };
     this.updateFileList(nextFile, () => {
-      this.props.onError?.(status, nextFile, event, xhr);
+      this.props.onError?.(status, nextFile, event);
     });
   };
 
-  handleAjaxUploadProgress = (
-    file: FileType,
-    percent: number,
-    event: React.SyntheticEvent<any>,
-    xhr: XMLHttpRequest
-  ) => {
+  handleAjaxUploadProgress = (file: FileType, percent: number, event) => {
     const nextFile: FileType = {
       ...file,
       status: 'uploading',
@@ -222,7 +206,7 @@ class Uploader extends React.Component<UploaderProps, UploaderState> {
     };
 
     this.updateFileList(nextFile, () => {
-      this.props.onProgress?.(percent, nextFile, event, xhr);
+      this.props.onProgress?.(percent, nextFile, event);
     });
   };
 
@@ -332,17 +316,17 @@ class Uploader extends React.Component<UploaderProps, UploaderState> {
       accept,
       children,
       toggleComponentClass,
-      draggable,
       ...rest
     } = this.props;
+
     const unhandled = getUnhandledProps(Uploader, rest);
+
     return (
       <UploadTrigger
         {...unhandled}
         name={name}
         key="trigger"
         multiple={multiple}
-        draggable={draggable}
         disabled={disabled}
         accept={accept}
         ref={this.inputRef}
@@ -355,18 +339,8 @@ class Uploader extends React.Component<UploaderProps, UploaderState> {
   }
 
   render() {
-    const {
-      classPrefix,
-      className,
-      listType,
-      fileListVisible,
-      locale,
-      style,
-      draggable
-    } = this.props;
-    const classes = classNames(className, classPrefix, this.addPrefix(listType), {
-      [this.addPrefix('draggable')]: draggable
-    });
+    const { classPrefix, className, listType, fileListVisible, locale, style } = this.props;
+    const classes = classNames(classPrefix, this.addPrefix(listType), className);
     const renderList = [this.renderUploadTrigger()];
 
     if (fileListVisible) {
@@ -378,11 +352,11 @@ class Uploader extends React.Component<UploaderProps, UploaderState> {
     }
 
     return (
-      <IntlContext.Provider value={locale}>
+      <IntlProvider locale={locale}>
         <div className={classes} style={style}>
           {renderList}
         </div>
-      </IntlContext.Provider>
+      </IntlProvider>
     );
   }
 }

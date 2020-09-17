@@ -5,11 +5,11 @@ import { getDOMNode } from '@test/testUtils';
 import DropdownMenuItem from '../DropdownMenuCheckItem';
 
 describe('picker - DropdownMenuCheckItem', () => {
-  it('Should output a item', () => {
+  it('Should output a li', () => {
     const Title = 'Title';
     const instance = getDOMNode(<DropdownMenuItem title="title">{Title}</DropdownMenuItem>);
 
-    assert.equal(instance.tagName, 'DIV');
+    assert.equal(instance.tagName, 'LI');
     assert.equal(instance.innerText, Title);
   });
 

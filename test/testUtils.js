@@ -1,5 +1,3 @@
-/* eslint-disable react/no-find-dom-node */
-
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import ReactTestUtils from 'react-dom/test-utils';
@@ -25,16 +23,14 @@ export class TestWrapper extends React.Component {
 }
 
 export function getInstance(children) {
-  // isReactComponent is only defined if children is of React.Component class
-  // so we can test against this to verify this is a functional component
-  if (!(children.type.prototype && children.type.prototype.isReactComponent)) {
-    const instanceRef = React.createRef();
+  const displayName = _.get(children, 'type.displayName') || _.get(children, 'displayName');
 
-    ReactTestUtils.renderIntoDocument(
-      <TestWrapper>{React.cloneElement(children, { ref: instanceRef })}</TestWrapper>
-    );
-
-    return instanceRef.current;
+  if (
+    displayName === 'withStyleProps(DefaultPropsComponent)' ||
+    displayName === 'withLocale(DefaultPropsComponent)' ||
+    displayName === 'SafeAnchor'
+  ) {
+    return ReactTestUtils.renderIntoDocument(<TestWrapper>{children}</TestWrapper>);
   }
 
   return ReactTestUtils.renderIntoDocument(children);
@@ -62,6 +58,8 @@ export function createTestContainer() {
 }
 
 export const toRGB = color => tinycolor(color).toRgbString();
+
+// export const getStyle = (dom, styleName) => window.getComputedStyle(dom)[styleName];
 
 export const inChrome = window.navigator.userAgent.includes('Chrome');
 

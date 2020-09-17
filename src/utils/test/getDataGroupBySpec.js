@@ -1,4 +1,6 @@
-import getDataGroupBy, { KEY_GROUP } from '../getDataGroupBy';
+import _ from 'lodash';
+
+import getDataGroupBy from '../getDataGroupBy';
 
 describe('[utils] getDataGroupBy', () => {
   it('Should be grouped by title', () => {
@@ -15,9 +17,17 @@ describe('[utils] getDataGroupBy', () => {
 
     const groups = getDataGroupBy(items, 'group');
 
-    assert.equal(groups[0].groupTitle, 'title');
-    assert.equal(groups[0][KEY_GROUP], true);
-    assert.equal(groups.length, 3);
+    assert.ok(
+      _.isEqual(groups, [
+        {
+          groupTitle: 'title',
+          children: [
+            { value: 'abc', group: 'title' },
+            { value: 'abcd', group: 'title' }
+          ]
+        }
+      ])
+    );
   });
 
   it('Should be grouped by title and sorted', () => {
@@ -41,8 +51,8 @@ describe('[utils] getDataGroupBy', () => {
     ];
 
     function compare(a, b) {
-      const nameA = a.toUpperCase();
-      const nameB = b.toUpperCase();
+      let nameA = a.toUpperCase();
+      let nameB = b.toUpperCase();
 
       if (nameA < nameB) {
         return -1;
@@ -67,10 +77,23 @@ describe('[utils] getDataGroupBy', () => {
 
     const groups = getDataGroupBy(items, 'group', sort);
 
-    assert.equal(groups[0].groupTitle, 'group-1');
-    assert.equal(groups[0][KEY_GROUP], true);
-    assert.equal(groups[3].groupTitle, 'group-2');
-    assert.equal(groups[3][KEY_GROUP], true);
-    assert.equal(groups.length, 6);
+    assert.ok(
+      _.isEqual(groups, [
+        {
+          groupTitle: 'group-1',
+          children: [
+            { value: 'a', group: 'group-1' },
+            { value: 'd', group: 'group-1' }
+          ]
+        },
+        {
+          groupTitle: 'group-2',
+          children: [
+            { value: 'b', group: 'group-2' },
+            { value: 'c', group: 'group-2' }
+          ]
+        }
+      ])
+    );
   });
 });

@@ -85,28 +85,13 @@ export interface UploaderProps extends StandardProps {
   onPreview?: (file: FileType, event: React.SyntheticEvent<any>) => void;
 
   /** Upload callback function with erro */
-  onError?: (
-    status: object,
-    file: FileType,
-    event: React.SyntheticEvent<any>,
-    xhr: XMLHttpRequest
-  ) => void;
+  onError?: (status: object, file: FileType, event: React.SyntheticEvent<any>) => void;
 
   /** callback function after successful upload */
-  onSuccess?: (
-    response: object,
-    file: FileType,
-    event: React.SyntheticEvent<any>,
-    xhr: XMLHttpRequest
-  ) => void;
+  onSuccess?: (response: object, file: FileType, event: React.SyntheticEvent<any>) => void;
 
   /** Callback functions that upload progress change */
-  onProgress?: (
-    percent: number,
-    file: FileType,
-    event: React.SyntheticEvent<any>,
-    xhr: XMLHttpRequest
-  ) => void;
+  onProgress?: (percent: number, file: FileType, event: React.SyntheticEvent<any>) => void;
 
   /** In the file list, click the callback function to delete a file */
   onRemove?: (file: FileType) => void;
@@ -125,9 +110,6 @@ export interface UploaderProps extends StandardProps {
 
   /** File list can be rendered */
   fileListVisible?: boolean;
-
-  /** Supported Drag and drop upload **/
-  draggable?: boolean;
 }
 
 declare const Uploader: React.ComponentType<UploaderProps>;

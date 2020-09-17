@@ -59,9 +59,10 @@
     }
 
     // reset link style
-    > a.@{ns}nav-item-content {
-      outline: none;
-      .reset-link-text-decoration(none);
+    > a.@{ns}nav-item-content:hover,
+    > a.@{ns}nav-item-content:active,
+    > a.@{ns}nav-item-content:focus {
+      text-decoration: none;
     }
   }
 

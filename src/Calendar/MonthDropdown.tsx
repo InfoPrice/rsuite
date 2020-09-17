@@ -56,7 +56,9 @@ class MonthDropdown extends React.PureComponent<MonthDropdownProps> {
   };
 
   componentDidUpdate() {
-    this.list?.forceUpdateGrid();
+    if (this.list) {
+      this.list.forceUpdateGrid();
+    }
   }
 
   getRowCount = () => {

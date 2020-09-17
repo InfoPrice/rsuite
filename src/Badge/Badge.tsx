@@ -9,7 +9,7 @@ class Badge extends React.Component<BadgeProps> {
     className: PropTypes.string,
     classPrefix: PropTypes.string,
     children: PropTypes.node,
-    content: PropTypes.oneOfType([PropTypes.node, PropTypes.bool]),
+    content: PropTypes.node,
     maxCount: PropTypes.number
   };
   static defaultProps = {
@@ -32,10 +32,6 @@ class Badge extends React.Component<BadgeProps> {
       [addPrefix('wrapper')]: children,
       [addPrefix('dot')]: dot
     });
-
-    if (contentText === false) {
-      return children;
-    }
 
     const content =
       // $FlowFixMe I'm sure contenxtText is number type and maxCount is number type.

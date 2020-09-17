@@ -1,10 +1,13 @@
+import _ from 'lodash';
 import classNames from 'classnames';
-import curry from 'lodash/curry';
+
+const getGlobal = new Function('return this;');
+const globals = getGlobal();
 
 export const globalKey = 'rs-';
 export const getClassNamePrefix = () => {
-  if (typeof __RSUITE_CLASSNAME_PREFIX__ !== 'undefined') {
-    return __RSUITE_CLASSNAME_PREFIX__;
+  if (globals && typeof globals.__RSUITE_CLASSNAME_PREFIX__ !== 'undefined') {
+    return globals.__RSUITE_CLASSNAME_PREFIX__;
   }
   return globalKey;
 };
@@ -15,11 +18,11 @@ export function prefix(pre: string, className: string | string[]): string {
     return '';
   }
 
-  if (Array.isArray(className)) {
+  if (_.isArray(className)) {
     return classNames(className.filter(name => !!name).map(name => `${pre}-${name}`));
   }
 
   return `${pre}-${className}`;
 }
 
-export default curry(prefix);
+export default _.curry(prefix);

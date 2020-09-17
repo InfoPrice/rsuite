@@ -6,9 +6,10 @@
 
   &-btn-group-vertical {
     position: relative;
+    white-space: nowrap;
+    vertical-align: middle;
+    display: table-cell;
     width: 20px;
-    flex: 0 0 20px;
-    display: block;
 
     & > .@{ns}btn {
       display: block;
@@ -26,7 +27,7 @@
     border-radius: 0;
     padding: 0;
     color: @number-input-button-color;
-    // Default size.
+    // Default sie.
     .input-touchspin(base);
 
     //sizes

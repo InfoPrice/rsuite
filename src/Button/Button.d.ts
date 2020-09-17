@@ -35,9 +35,6 @@ export interface ButtonProps extends StandardProps {
 
   /** Called when the button is clicked. */
   onClick?: (event: React.SyntheticEvent) => void;
-
-  /** Ripple after button click */
-  ripple?: boolean;
 }
 
 declare const Button: React.ComponentType<ButtonProps>;

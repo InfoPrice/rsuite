@@ -1,15 +1,10 @@
 import * as React from 'react';
-import createContext from '../utils/createContext';
+import IntlContext from './IntlContext';
+
 import { IntlProviderProps } from './IntlProvider.d';
 
-export const IntlGlobalContext = createContext<IntlProviderProps>(null);
-
-const IntlProvider = ({ locale, rtl, children, formatDate }: IntlProviderProps) => {
-  return (
-    <IntlGlobalContext.Provider value={{ ...locale, rtl, formatDate }}>
-      {children}
-    </IntlGlobalContext.Provider>
-  );
+const IntlProvider = ({ locale, rtl, children }: IntlProviderProps) => {
+  return <IntlContext.Provider value={{ ...locale, rtl }}>{children}</IntlContext.Provider>;
 };
 
 export default IntlProvider;

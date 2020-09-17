@@ -2,7 +2,7 @@ import createChainedFunction from '../createChainedFunction';
 
 describe('[utils] createChainedFunction', () => {
   it('Should call all functions', () => {
-    let i = 0;
+    var i = 0;
     function a() {
       i += 1;
     }

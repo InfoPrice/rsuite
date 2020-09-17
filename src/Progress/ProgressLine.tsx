@@ -14,7 +14,6 @@ class ProgressLine extends React.Component<ProgressLineProps> {
     trailColor: PropTypes.string,
     trailWidth: PropTypes.number,
     showInfo: PropTypes.bool,
-    vertical: PropTypes.bool,
     status: PropTypes.oneOf(['success', 'fail', 'active'])
   };
   static defaultProps = {
@@ -33,7 +32,6 @@ class ProgressLine extends React.Component<ProgressLineProps> {
       status,
       showInfo,
       classPrefix,
-      vertical,
       ...rest
     } = this.props;
 
@@ -41,16 +39,15 @@ class ProgressLine extends React.Component<ProgressLineProps> {
     const unhandled = getUnhandledProps(ProgressLine, rest);
     const lineInnerStyle = {
       backgroundColor: trailColor,
-      [vertical ? 'width' : 'height']: trailWidth || strokeWidth
+      height: trailWidth || strokeWidth
     };
     const percentStyle = {
-      [vertical ? 'height' : 'width']: `${percent}%`,
+      width: `${percent}%`,
       backgroundColor: strokeColor,
-      [vertical ? 'width' : 'height']: strokeWidth
+      height: strokeWidth
     };
 
     const classes = classNames(classPrefix, addPrefix('line'), className, {
-      [addPrefix('line-vertical')]: vertical,
       [addPrefix(`line-${status || ''}`)]: !!status
     });
 

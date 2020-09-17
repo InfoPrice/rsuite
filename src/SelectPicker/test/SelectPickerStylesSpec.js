@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM, { findDOMNode } from 'react-dom';
 import SelectPicker from '../index';
+import Button from '../../Button';
 import {
   createTestContainer,
   getDOMNode,
@@ -34,9 +35,7 @@ describe('SelectPicker styles', () => {
   it('Default select picker should render correct toggle styles', () => {
     const instanceRef = React.createRef();
     ReactDOM.render(<SelectPicker ref={instanceRef} open />, createTestContainer());
-    const toggleDom = findDOMNode(
-      getDOMNode(instanceRef.current).querySelector('.rs-picker-toggle')
-    );
+    const toggleDom = getDOMNode(instanceRef.current).querySelector('.rs-picker-toggle');
     const pickerNoneDom = document.body.querySelector('.rs-picker-none');
     inChrome &&
       assert.equal(getStyle(toggleDom, 'border'), `1px solid ${toRGB('#e5e5ea')}`, 'Toggle border');
@@ -62,68 +61,39 @@ describe('SelectPicker styles', () => {
     assert.equal(getStyle(toggleDom, 'backgroundColor'), toRGB('#0000'), 'Toggle background-color');
   });
 
-  itChrome('Select picker default toggle should render correct size', () => {
+  itChrome('Select picker should render correct size', () => {
     const instanceRef = React.createRef();
     const instance = (
       <div ref={instanceRef}>
-        <SelectPicker size="lg" placeholder="Large" data={data} />
-        <SelectPicker size="md" placeholder="Medium" data={data} />
-        <SelectPicker size="sm" placeholder="Small" data={data} />
-        <SelectPicker size="xs" placeholder="Xsmall" data={data} />
+        <SelectPicker toggleComponentClass={Button} size="lg" placeholder="Large" data={data} />
+        <SelectPicker toggleComponentClass={Button} size="md" placeholder="Medium" data={data} />
+        <SelectPicker toggleComponentClass={Button} size="sm" placeholder="Small" data={data} />
+        <SelectPicker toggleComponentClass={Button} size="xs" placeholder="Xsmall" data={data} />
       </div>
     );
 
     ReactDOM.render(instance, createTestContainer());
-    const pickerToggles = findDOMNode(instanceRef.current).querySelectorAll('.rs-picker-toggle');
+    const pickerToggles = findDOMNode(instanceRef.current).querySelectorAll(
+      '.rs-picker-toggle-custom'
+    );
     assert.equal(
       getStyle(pickerToggles[0], 'padding'),
-      '9px 36px 9px 15px',
+      '9px 32px 9px 16px',
       'Large Toggle padding'
     );
     assert.equal(
       getStyle(pickerToggles[1], 'padding'),
-      '7px 32px 7px 11px',
-      'Medium Toggle padding'
-    );
-    assert.equal(getStyle(pickerToggles[2], 'padding'), '4px 30px 4px 9px', 'Small Toggle padding');
-    assert.equal(
-      getStyle(pickerToggles[3], 'padding'),
-      '1px 28px 1px 7px',
-      'Xsmall Toggle padding'
-    );
-  });
-
-  itChrome('Select picker subtle toggle should render correct size', () => {
-    const instanceRef = React.createRef();
-    const instance = (
-      <div ref={instanceRef}>
-        <SelectPicker size="lg" appearance="subtle" placeholder="Large" data={data} />
-        <SelectPicker size="md" appearance="subtle" placeholder="Medium" data={data} />
-        <SelectPicker size="sm" appearance="subtle" placeholder="Small" data={data} />
-        <SelectPicker size="xs" appearance="subtle" placeholder="Xsmall" data={data} />
-      </div>
-    );
-
-    ReactDOM.render(instance, createTestContainer());
-    const pickerToggles = findDOMNode(instanceRef.current).querySelectorAll('.rs-picker-toggle');
-    assert.equal(
-      getStyle(pickerToggles[0], 'padding'),
-      '10px 36px 10px 16px',
-      'Large Toggle padding'
-    );
-    assert.equal(
-      getStyle(pickerToggles[1], 'padding'),
-      '8px 32px 8px 12px',
+      '7px 32px 7px 12px',
       'Medium Toggle padding'
     );
     assert.equal(
       getStyle(pickerToggles[2], 'padding'),
-      '5px 30px 5px 10px',
+      '4px 32px 4px 10px',
       'Small Toggle padding'
     );
     assert.equal(
       getStyle(pickerToggles[3], 'padding'),
-      '2px 28px 2px 8px',
+      '1px 32px 1px 8px',
       'Xsmall Toggle padding'
     );
   });
@@ -137,18 +107,14 @@ describe('SelectPicker styles', () => {
   it('Select picker group should render correct styles', () => {
     const instanceRef = React.createRef();
     ReactDOM.render(
-      <SelectPicker
-        ref={instanceRef}
-        groupBy="role"
-        data={data}
-        menuClassName="group-test-menu"
-        open
-      />,
+      <SelectPicker ref={instanceRef} groupBy="role" data={data} />,
       createTestContainer()
     );
-    const secondItemGroup = document.body.querySelectorAll(
-      '.group-test-menu .rs-picker-select-menu-group'
-    )[1];
+    const toggleDom = getDOMNode(instanceRef.current).querySelector('.rs-picker-toggle');
+    toggleDom.click();
+    const secondItemGroup = document.body.querySelector(
+      '.rs-picker-select-menu-group:nth-child(2)'
+    );
     inChrome &&
       assert.equal(
         getStyle(secondItemGroup, 'borderTop'),
