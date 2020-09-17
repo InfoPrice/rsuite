@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 /**
  * Run all tests: `npm run tdd`
  * Run all styles tests: `M=styles npm run tdd`
@@ -7,7 +6,6 @@
  */
 
 const path = require('path');
-const webpack = require('webpack');
 
 const webpackConfig = {
   output: {
@@ -20,13 +18,6 @@ const webpackConfig = {
       '@test': path.resolve(__dirname, './test')
     }
   },
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        RUN_ENV: JSON.stringify(process.env.RUN_ENV)
-      }
-    })
-  ],
   module: {
     rules: [
       {

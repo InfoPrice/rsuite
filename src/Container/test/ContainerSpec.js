@@ -1,4 +1,6 @@
 import React from 'react';
+import { findDOMNode } from 'react-dom';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import Container from '../Container';
 import Sidebar from '../../Sidebar';
@@ -50,7 +52,7 @@ describe('Container', () => {
   });
 
   it('Should have a custom className prefix', () => {
-    const instance = getDOMNode(<Container classPrefix="custom-prefix" />);
-    assert.ok(instance.className.match(/\bcustom-prefix\b/));
+    const instance = ReactTestUtils.renderIntoDocument(<Container classPrefix="custom-prefix" />);
+    assert.ok(findDOMNode(instance).className.match(/\bcustom-prefix\b/));
   });
 });

@@ -30,9 +30,6 @@ export interface DatePickerProps extends PickerBaseProps, FormControlBaseProps<D
   /** Whether to show week numbers */
   showWeekNumbers?: boolean;
 
-  /** Meridian format */
-  showMeridian?: boolean;
-
   /** Disabled date */
   disabledDate?: (date?: Date) => boolean;
 

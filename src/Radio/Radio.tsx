@@ -2,10 +2,11 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import _ from 'lodash';
+import setDisplayName from 'recompose/setDisplayName';
 import { RadioContext } from '../RadioGroup/RadioGroup';
 import { RadioContextProps } from '../RadioGroup/RadioGroup.d';
 
-import { prefix, getUnhandledProps, partitionHTMLProps, defaultProps, refType } from '../utils';
+import { prefix, getUnhandledProps, partitionHTMLProps, defaultProps } from '../utils';
 import { RadioProps } from './Radio.d';
 
 interface RadioState {
@@ -22,7 +23,7 @@ class Radio extends React.Component<RadioProps, RadioState> {
     disabled: PropTypes.bool,
     checked: PropTypes.bool,
     defaultChecked: PropTypes.bool,
-    inputRef: refType,
+    inputRef: PropTypes.func,
     children: PropTypes.node,
     className: PropTypes.string,
     classPrefix: PropTypes.string,
@@ -122,6 +123,8 @@ class Radio extends React.Component<RadioProps, RadioState> {
   }
 }
 
-export default defaultProps<RadioProps>({
+const EnhancedRadio = defaultProps<RadioProps>({
   classPrefix: 'radio'
 })(Radio);
+
+export default setDisplayName('Radio')(EnhancedRadio);

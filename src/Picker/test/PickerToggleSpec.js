@@ -23,7 +23,7 @@ describe('Toggle', () => {
     );
 
     assert.equal(instance.tagName, 'BUTTON');
-    assert.include(instance.className, 'toggle');
+    assert.include(instance.className, 'toggle-custom');
     assert.equal(instance.innerText, Title);
   });
 

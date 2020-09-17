@@ -1,10 +1,8 @@
 import * as React from 'react';
 import _ from 'lodash';
 import { setDisplayName, wrapDisplayName } from 'recompose';
-import format from 'date-fns/format';
 import defaultLocale from './locales/default';
-import extendReactStatics from '../utils/extendReactStatics';
-import { IntlGlobalContext } from './IntlProvider';
+import IntlContext from './IntlContext';
 
 const mergeObject = (list: any[]) =>
   list.reduce((a, b) => {
@@ -13,17 +11,17 @@ const mergeObject = (list: any[]) =>
   }, {});
 
 function withLocale<T>(combineKeys: string[] = []) {
-  return (BaseComponent: React.ComponentType<any>) => {
+  return (BaseComponent: React.ComponentClass<any>) => {
+    const factory = React.createFactory(BaseComponent);
     const WithLocale = React.forwardRef((props: T, ref) => {
       return (
-        <IntlGlobalContext.Consumer>
-          {options => {
+        <IntlContext.Consumer>
+          {value => {
             const locale = mergeObject(
-              combineKeys.map(key => _.get(options || defaultLocale, `${key}`))
+              combineKeys.map(key => _.get(value || defaultLocale, `${key}`))
             );
-
-            if (options && typeof options.rtl !== undefined) {
-              locale.rtl = options.rtl;
+            if (value && typeof value.rtl !== undefined) {
+              locale.rtl = value.rtl;
             } else if (
               typeof window !== 'undefined' &&
               (document.body.getAttribute('dir') || document.dir) === 'rtl'
@@ -31,26 +29,23 @@ function withLocale<T>(combineKeys: string[] = []) {
               locale.rtl = true;
             }
 
-            locale.formatDate = options?.formatDate || format;
-
-            return React.createElement(BaseComponent, {
+            return factory({
               ref,
               locale,
               ...props
             });
           }}
-        </IntlGlobalContext.Consumer>
+        </IntlContext.Consumer>
       );
     });
 
     WithLocale.displayName = BaseComponent.displayName;
-    extendReactStatics(WithLocale, BaseComponent, ['defaultProps']);
 
-    if (process.env.RUN_ENV === 'test') {
-      return setDisplayName(wrapDisplayName(BaseComponent, '__test__'))(WithLocale);
+    if (process.env.NODE_ENV !== 'production') {
+      return setDisplayName(wrapDisplayName(BaseComponent, 'withLocale'))(WithLocale);
     }
 
-    return setDisplayName(wrapDisplayName(BaseComponent, 'withLocale'))(WithLocale);
+    return WithLocale;
   };
 }
 

@@ -12,7 +12,7 @@ export interface PlaceholderParagraphProps extends StandardProps {
   rowMargin?: number;
 
   /* show graph */
-  graph?: boolean | 'circle' | 'square' | 'image';
+  graph?: boolean | 'circle' | 'square';
 
   /** Placeholder status */
   active?: boolean;

@@ -43,7 +43,7 @@ class StepItem extends React.Component<StepItemProps> {
 
     const contentNode = (
       <div className={addPrefix('content')}>
-        {<div className={addPrefix('title')}>{title}</div>}
+        {title && <div className={addPrefix('title')}>{title}</div>}
         {description && <div className={addPrefix('description')}>{description}</div>}
       </div>
     );

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import reactToString from '../utils/reactToString';
+import { reactToString } from 'rsuite-utils/lib/utils';
 
 export interface SelectedElementProps {
   selectedItems: any[];
@@ -30,7 +30,7 @@ const SelectedElement = (props: SelectedElementProps) => {
   if (count) {
     title = selectedItems
       .map(item => {
-        const label = item[labelKey];
+        let label = item[labelKey];
         if (typeof label === 'string' || typeof label === 'number') {
           return label;
         } else if (React.isValidElement(label)) {
@@ -45,7 +45,7 @@ const SelectedElement = (props: SelectedElementProps) => {
     <React.Fragment>
       <span className={prefix('value-list')} title={title}>
         {selectedItems.map((item, index) => {
-          const checkAll = cascade && (item.checkAll || item[childrenKey]);
+          let checkAll = cascade && (item.checkAll || item[childrenKey]);
           return (
             <React.Fragment key={item[valueKey]}>
               <span className={prefix('value-item')}>

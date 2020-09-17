@@ -2,13 +2,14 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import _ from 'lodash';
+import setDisplayName from 'recompose/setDisplayName';
 import setStatic from 'recompose/setStatic';
 import bindElementResize, { unbind as unbindElementResize } from 'element-resize-event';
-import BaseModal from './BaseModal';
-import Bounce from '../Animation/Bounce';
-import { on, getHeight } from 'dom-lib';
-import { prefix, defaultProps, createChainedFunction } from '../utils';
-import ModalDialog, { modalDialogPropTypes } from './ModalDialog';
+import BaseModal from 'rsuite-utils/lib/Overlay/Modal';
+import Bounce from 'rsuite-utils/lib/Animation/Bounce';
+import { on, getHeight, isOverflowing, getScrollbarSize, ownerDocument } from 'dom-lib';
+import { prefix, defaultProps, createChainedFunction, isRTL } from '../utils';
+import ModalDialog from './ModalDialog';
 import ModalBody from './ModalBody';
 import ModalHeader from './ModalHeader';
 import ModalTitle from './ModalTitle';
@@ -16,11 +17,11 @@ import ModalFooter from './ModalFooter';
 import { ModalProps } from './Modal.d';
 import { SIZE } from '../constants';
 import ModalContext from './ModalContext';
-import mergeRefs from '../utils/mergeRefs';
 
 const BACKDROP_TRANSITION_DURATION = 150;
 
 interface ModalState {
+  modalStyles?: React.CSSProperties;
   bodyStyles?: React.CSSProperties;
 }
 
@@ -75,18 +76,17 @@ class Modal extends React.Component<ModalProps, ModalState> {
     dialogComponentClass: ModalDialog,
     overflow: true
   };
-
-  dialogElement: HTMLDivElement;
-
-  // for test
-  modalRef: React.Ref<any>;
+  dialogRef: React.RefObject<any>;
+  modalRef: React.RefObject<unknown>;
 
   constructor(props) {
     super(props);
     this.state = {
+      modalStyles: {},
       bodyStyles: {}
     };
 
+    this.dialogRef = React.createRef();
     this.modalRef = React.createRef();
   }
 
@@ -94,13 +94,30 @@ class Modal extends React.Component<ModalProps, ModalState> {
     this.destroyEvent();
   }
 
-  getBodyStylesByDialog(dialogElement?: HTMLElement) {
-    const { overflow, drawer } = this.props;
-    const node = dialogElement || this.dialogElement;
+  getStyles(dialogElement?: HTMLElement) {
+    const { container, overflow, drawer } = this.props;
+    const node: any = dialogElement || this.dialogRef.current;
+    const doc: any = ownerDocument(node);
     const scrollHeight = node ? node.scrollHeight : 0;
 
+    const bodyIsOverflowing = isOverflowing(container || doc.body);
+    const modalIsOverflowing = scrollHeight > doc.documentElement.clientHeight;
+
+    const styles: {
+      modalStyles: React.CSSProperties;
+      bodyStyles: React.CSSProperties;
+    } = {
+      modalStyles: {
+        [isRTL() ? 'paddingLeft' : 'paddingRight']:
+          bodyIsOverflowing && !modalIsOverflowing ? getScrollbarSize() : 0,
+        [isRTL() ? 'paddingRight' : 'paddingLeft']:
+          !bodyIsOverflowing && modalIsOverflowing ? getScrollbarSize() : 0
+      },
+      bodyStyles: {}
+    };
+
     if (!overflow) {
-      return {};
+      return styles;
     }
 
     const bodyStyles: React.CSSProperties = {
@@ -134,7 +151,9 @@ class Modal extends React.Component<ModalProps, ModalState> {
       }
     }
 
-    return bodyStyles;
+    styles.bodyStyles = bodyStyles;
+
+    return styles;
   }
 
   windowResizeListener = null;
@@ -142,20 +161,15 @@ class Modal extends React.Component<ModalProps, ModalState> {
   getBodyStyles = () => {
     return this.state.bodyStyles;
   };
-  bindDialogRef = ref => {
-    this.dialogElement = ref;
-  };
 
   handleShow = () => {
-    const dialogElement = this.dialogElement;
+    const dialogElement = this.dialogRef.current;
 
     this.updateModalStyles(dialogElement);
     this.contentElement = dialogElement.querySelector(`.${this.addPrefix('content')}`);
     this.windowResizeListener = on(window, 'resize', this.handleResize);
+
     bindElementResize(this.contentElement, this.handleResize);
-  };
-  handleShowing = () => {
-    this.updateModalStyles(this.dialogElement);
   };
   handleHide = () => {
     this.destroyEvent();
@@ -165,22 +179,25 @@ class Modal extends React.Component<ModalProps, ModalState> {
       return;
     }
 
-    this.props?.onHide?.(event);
+    const { onHide } = this.props;
+    onHide && onHide(event);
   };
 
   handleResize = () => {
-    this.updateModalStyles(this.dialogElement);
+    this.updateModalStyles(this.dialogRef.current);
   };
 
   destroyEvent() {
-    this.windowResizeListener?.off?.();
+    if (this.windowResizeListener) {
+      this.windowResizeListener.off();
+    }
     if (this.contentElement) {
       unbindElementResize(this.contentElement);
     }
   }
 
   updateModalStyles(dialogElement: HTMLElement) {
-    this.setState({ bodyStyles: this.getBodyStylesByDialog(dialogElement) });
+    this.setState(this.getStyles(dialogElement));
   }
 
   addPrefix = (name: string) => prefix(this.props.classPrefix)(name);
@@ -194,6 +211,7 @@ class Modal extends React.Component<ModalProps, ModalState> {
       dialogStyle,
       animation,
       classPrefix,
+      style,
       show,
       size,
       full,
@@ -204,12 +222,30 @@ class Modal extends React.Component<ModalProps, ModalState> {
       ...rest
     } = this.props;
 
+    const { modalStyles } = this.state;
     const inClass = { in: show && !animation };
     const Dialog: React.ElementType = dialogComponentClass;
+
+    const parentProps = _.pick(rest, _.get(BaseModal, 'handledProps'));
 
     const classes = classNames(this.addPrefix(size), className, {
       [this.addPrefix('full')]: full
     });
+
+    const modal = (
+      <Dialog
+        {..._.pick(rest, Object.keys(ModalDialog.propTypes || {}))}
+        style={{ ...modalStyles, ...style }}
+        classPrefix={classPrefix}
+        className={classes}
+        dialogClassName={dialogClassName}
+        dialogStyle={dialogStyle}
+        onClick={rest.backdrop === true ? this.handleDialogClick : null}
+        dialogRef={this.dialogRef}
+      >
+        {children}
+      </Dialog>
+    );
 
     return (
       <ModalContext.Provider
@@ -219,13 +255,11 @@ class Modal extends React.Component<ModalProps, ModalState> {
         }}
       >
         <BaseModal
-          {...rest}
           ref={this.modalRef}
           show={show}
           onHide={onHide}
           className={this.addPrefix('wrapper')}
-          onEntered={createChainedFunction(this.handleShow, this.props.onEntered)}
-          onEntering={createChainedFunction(this.handleShowing, this.props.onEntering)}
+          onEntering={createChainedFunction(this.handleShow, this.props.onEntering)}
           onExited={createChainedFunction(this.handleHide, this.props.onExited)}
           backdropClassName={classNames(this.addPrefix('backdrop'), backdropClassName, inClass)}
           containerClassName={classNames(this.addPrefix('open'), {
@@ -235,24 +269,9 @@ class Modal extends React.Component<ModalProps, ModalState> {
           animationProps={animationProps}
           dialogTransitionTimeout={animationTimeout}
           backdropTransitionTimeout={BACKDROP_TRANSITION_DURATION}
+          {...parentProps}
         >
-          {(transitionProps, ref) => {
-            const { className: transitionClassName, ...transitionRest } = transitionProps;
-            return (
-              <Dialog
-                {...transitionRest}
-                {..._.pick(rest, Object.keys(modalDialogPropTypes))}
-                classPrefix={classPrefix}
-                className={classNames(classes, transitionClassName)}
-                dialogClassName={dialogClassName}
-                dialogStyle={dialogStyle}
-                onClick={rest.backdrop === true ? this.handleDialogClick : null}
-                dialogRef={mergeRefs(this.bindDialogRef, ref)}
-              >
-                {children}
-              </Dialog>
-            );
-          }}
+          {modal}
         </BaseModal>
       </ModalContext.Provider>
     );
@@ -269,4 +288,4 @@ setStatic('Title', ModalTitle)(EnhancedModal);
 setStatic('Footer', ModalFooter)(EnhancedModal);
 setStatic('Dialog', ModalDialog)(EnhancedModal);
 
-export default EnhancedModal;
+export default setDisplayName('Modal')(EnhancedModal);

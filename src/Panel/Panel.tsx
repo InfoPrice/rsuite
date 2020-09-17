@@ -2,7 +2,7 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import _ from 'lodash';
-import Collapse from '../Animation/Collapse';
+import Collapse from 'rsuite-utils/lib/Animation/Collapse';
 
 import { getUnhandledProps, defaultProps, prefix } from '../utils';
 import { PanelProps } from './Panel.d';
@@ -72,12 +72,13 @@ class Panel extends React.Component<PanelProps, PanelState> {
   renderCollapsibleBody(panelRole?: string) {
     const { id } = this.props;
     const collapseProps = {
-      ..._.pick(this.props, Object.keys(Collapse.propTypes)),
+      ..._.pick(this.props, _.get(Collapse, 'handledProps')),
       in: this.isExpanded()
     };
 
     const props: React.HTMLAttributes<HTMLDivElement> = {
       id: id ? `${id}` : null,
+      className: this.addPrefix('collapse'),
       'aria-hidden': !this.isExpanded()
     };
     if (panelRole) {
@@ -86,19 +87,7 @@ class Panel extends React.Component<PanelProps, PanelState> {
 
     return (
       <Collapse {...collapseProps}>
-        {(transitionProps, ref) => {
-          const { className, ...rest } = transitionProps;
-          return (
-            <div
-              {...props}
-              {...rest}
-              className={classNames(this.addPrefix('collapse'), className)}
-              ref={ref}
-            >
-              {this.renderBody()}
-            </div>
-          );
-        }}
+        <div {...props}>{this.renderBody()}</div>
       </Collapse>
     );
   }
@@ -113,14 +102,14 @@ class Panel extends React.Component<PanelProps, PanelState> {
   }
 
   renderHeading(headerRole?: string) {
-    let { header } = this.props;
+    let { header, collapsible } = this.props;
 
     if (!header) {
       return null;
     }
 
     if (!React.isValidElement(header) || Array.isArray(header)) {
-      header = this.props.collapsible ? this.renderCollapsibleTitle(header, headerRole) : header;
+      header = collapsible ? this.renderCollapsibleTitle(header, headerRole) : header;
     } else {
       const className = classNames(this.addPrefix('title'), _.get(header, 'props.className'));
       header = React.cloneElement<any>(header, { className });

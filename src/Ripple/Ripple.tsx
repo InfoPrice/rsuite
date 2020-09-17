@@ -1,7 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import Transition from '../Animation/Transition';
+import Transition from 'rsuite-utils/lib/Animation/Transition';
 import { getOffset, on } from 'dom-lib';
 import { defaultProps, getUnhandledProps, prefix } from '../utils';
 import { RippleProps } from './Ripple.d';
@@ -97,17 +97,7 @@ class Ripple extends React.Component<RippleProps, RippleState> {
           enteringClassName={this.addPrefix('rippling')}
           onEntered={this.handleRippled}
         >
-          {(props, ref) => {
-            const { className, ...transitionRest } = props;
-            return (
-              <span
-                {...transitionRest}
-                ref={ref}
-                className={classNames(classPrefix, className)}
-                style={position}
-              />
-            );
-          }}
+          <span className={classPrefix} style={position} />
         </Transition>
       </span>
     );

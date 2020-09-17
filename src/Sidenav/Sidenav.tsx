@@ -2,8 +2,8 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import setStatic from 'recompose/setStatic';
-import Transition from '../Animation/Transition';
-import shallowEqual from '../utils/shallowEqual';
+import Transition from 'rsuite-utils/lib/Animation/Transition';
+import shallowEqual from 'rsuite-utils/lib/utils/shallowEqual';
 import _ from 'lodash';
 import SidenavBody from './SidenavBody';
 import SidenavHeader from './SidenavHeader';
@@ -58,7 +58,7 @@ class Sidenav extends React.Component<SidenavProps, SidenavState> {
 
   handleOpenChange = (eventKey: any, event: React.MouseEvent) => {
     const find = key => shallowEqual(key, eventKey);
-    const openKeys = _.clone(this.getOpenKeys()) || [];
+    let openKeys = _.clone(this.getOpenKeys()) || [];
 
     if (openKeys.some(find)) {
       _.remove(openKeys, find);
@@ -104,18 +104,7 @@ class Sidenav extends React.Component<SidenavProps, SidenavState> {
           enteredClassName={addPrefix('collapse-in')}
           enteringClassName={addPrefix(['collapse-in', 'collapsing'])}
         >
-          {(props, ref) => {
-            const { className, ...rest } = props;
-            return (
-              <Component
-                {...rest}
-                {...unhandled}
-                ref={ref}
-                className={classNames(classes, className)}
-                role="navigation"
-              />
-            );
-          }}
+          <Component {...unhandled} className={classes} role="navigation" />
         </Transition>
       </SidenavContext.Provider>
     );

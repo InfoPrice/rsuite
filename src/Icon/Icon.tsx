@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { defaultProps, prefix } from '../utils';
 import { IconProps } from './Icon.d';
-import { SVGIcon } from '../@types/common';
 
 class Icon extends React.Component<IconProps> {
   static propTypes = {
@@ -34,7 +33,6 @@ class Icon extends React.Component<IconProps> {
       flip,
       stack,
       inverse,
-      style,
       svgStyle,
       componentClass: Component,
       ...props
@@ -50,16 +48,15 @@ class Icon extends React.Component<IconProps> {
       [addPrefix('pulse')]: pulse,
       [addPrefix(`size-${size || ''}`)]: size,
       [addPrefix(`flip-${flip || ''}`)]: flip,
+      [addPrefix(`rotate-${rotate || ''}`)]: rotate,
       [addPrefix(`stack-${stack || ''}`)]: stack,
       [addPrefix('inverse')]: inverse
     });
 
-    const styles = rotate ? { transform: `rotate(${rotate}deg)`, ...style } : style;
-
     if (isSvgIcon) {
-      const svgIcon = icon as SVGIcon;
+      const svgIcon: any = icon;
       return (
-        <Component {...props} className={classes} style={styles}>
+        <Component {...props} className={classes}>
           <svg style={svgStyle} viewBox={svgIcon.viewBox}>
             <use xlinkHref={`#${svgIcon.id}`} />
           </svg>
@@ -67,7 +64,7 @@ class Icon extends React.Component<IconProps> {
       );
     }
 
-    return <Component {...props} className={classes} style={styles} />;
+    return <Component {...props} className={classes} />;
   }
 }
 

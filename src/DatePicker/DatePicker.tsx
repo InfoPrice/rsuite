@@ -1,9 +1,11 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import compose from 'recompose/compose';
 import _ from 'lodash';
 import { polyfill } from 'react-lifecycles-compat';
 import {
+  format,
   getMinutes,
   getHours,
   isSameDay,
@@ -13,15 +15,20 @@ import {
   setSeconds
 } from 'date-fns';
 
-import IntlContext from '../IntlProvider/IntlContext';
-import FormattedDate from '../IntlProvider/FormattedDate';
+import IntlProvider from '../IntlProvider';
 import Calendar from '../Calendar/Calendar';
 import Toolbar from './Toolbar';
 
-import { disabledTime, calendarOnlyProps } from '../utils/timeUtils';
+import disabledTime, { calendarOnlyProps } from '../utils/disabledTime';
 import { shouldOnlyTime } from '../utils/formatUtils';
 import composeFunctions from '../utils/composeFunctions';
-import { defaultProps, getUnhandledProps, prefix, createChainedFunction } from '../utils';
+import {
+  defaultProps,
+  getUnhandledProps,
+  prefix,
+  createChainedFunction,
+  withPickerMethods
+} from '../utils';
 
 import {
   PickerToggle,
@@ -31,7 +38,7 @@ import {
 } from '../Picker';
 
 import { DatePickerProps } from './DatePicker.d';
-import { pickerPropTypes, pickerDefaultProps } from '../Picker/propTypes';
+import { PLACEMENT } from '../constants';
 
 interface DatePickerState {
   value?: Date;
@@ -42,18 +49,33 @@ interface DatePickerState {
 
 class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
   static propTypes = {
-    ...pickerPropTypes,
+    appearance: PropTypes.oneOf(['default', 'subtle']),
     ranges: PropTypes.array,
     defaultValue: PropTypes.instanceOf(Date),
     value: PropTypes.instanceOf(Date),
     calendarDefaultDate: PropTypes.instanceOf(Date),
+    placeholder: PropTypes.string,
     format: PropTypes.string,
+    disabled: PropTypes.bool,
+    locale: PropTypes.object,
     inline: PropTypes.bool,
+    cleanable: PropTypes.bool,
     isoWeek: PropTypes.bool,
     limitEndYear: PropTypes.number,
+    className: PropTypes.string,
+    menuClassName: PropTypes.string,
+    classPrefix: PropTypes.string,
+    container: PropTypes.oneOfType([PropTypes.node, PropTypes.func]),
+    containerPadding: PropTypes.number,
+    block: PropTypes.bool,
+    toggleComponentClass: PropTypes.elementType,
+    open: PropTypes.bool,
+    defaultOpen: PropTypes.bool,
+    placement: PropTypes.oneOf(PLACEMENT),
+    style: PropTypes.object,
     oneTap: PropTypes.bool,
+    preventOverflow: PropTypes.bool,
     showWeekNumbers: PropTypes.bool,
-    showMeridian: PropTypes.bool,
     disabledDate: PropTypes.func,
     disabledHours: PropTypes.func,
     disabledMinutes: PropTypes.func,
@@ -68,10 +90,22 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
     onSelect: PropTypes.func,
     onPrevMonth: PropTypes.func,
     onNextMonth: PropTypes.func,
-    onOk: PropTypes.func
+    onOk: PropTypes.func,
+    onClean: PropTypes.func,
+    onEnter: PropTypes.func,
+    onEntering: PropTypes.func,
+    onEntered: PropTypes.func,
+    onExit: PropTypes.func,
+    onExiting: PropTypes.func,
+    onExited: PropTypes.func,
+    onOpen: PropTypes.func,
+    onClose: PropTypes.func,
+    onHide: PropTypes.func,
+    renderValue: PropTypes.func
   };
   static defaultProps = {
-    ...pickerDefaultProps,
+    appearance: 'default',
+    placement: 'bottomStart',
     limitEndYear: 1000,
     format: 'YYYY-MM-DD',
     placeholder: '',
@@ -89,11 +123,11 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
       hours: 'Hours',
       minutes: 'Minutes',
       seconds: 'Seconds'
-    }
+    },
+    cleanable: true
   };
   menuContainerRef: React.RefObject<any>;
   triggerRef: React.RefObject<any>;
-  calendar = null;
 
   constructor(props: DatePickerProps) {
     super(props);
@@ -156,15 +190,13 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
     const value = this.getValue();
 
     if (value) {
-      return renderValue ? (
-        renderValue(value, formatType)
-      ) : (
-        <FormattedDate date={value} formatStr={formatType} />
-      );
+      return renderValue ? renderValue(value, formatType) : format(value, formatType);
     }
 
     return placeholder || formatType;
   }
+
+  calendar = null;
 
   handleChangePageDate = (nextPageDate: Date) => {
     this.setState({
@@ -175,15 +207,10 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
   };
 
   handleChangePageTime = (nextPageTime: Date) => {
-    this.setState({ pageDate: nextPageTime });
+    this.setState({
+      pageDate: nextPageTime
+    });
     this.handleAllSelect(nextPageTime);
-  };
-  handleToggleMeridian = () => {
-    const { pageDate } = this.state;
-    const hours = getHours(pageDate);
-    const nextHours = hours >= 12 ? hours - 12 : hours + 12;
-    const nextDate = setHours(pageDate, nextHours);
-    this.setState({ pageDate: nextDate });
   };
 
   handleShortcutPageDate = (
@@ -229,17 +256,15 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
   }
 
   handleCloseDropdown = () => {
-    this.triggerRef.current?.hide?.();
+    if (this.triggerRef.current) {
+      this.triggerRef.current.hide();
+    }
   };
 
   handleOpenDropdown = () => {
-    this.triggerRef.current?.show?.();
-  };
-  open = () => {
-    this.handleOpenDropdown?.();
-  };
-  close = () => {
-    this.handleCloseDropdown?.();
+    if (this.triggerRef.current) {
+      this.triggerRef.current.show();
+    }
   };
 
   showMonthDropdown() {
@@ -335,14 +360,7 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
   addPrefix = (name: string) => prefix(this.props.classPrefix)(name);
 
   renderCalendar() {
-    const {
-      format,
-      isoWeek,
-      limitEndYear,
-      disabledDate,
-      showWeekNumbers,
-      showMeridian
-    } = this.props;
+    const { format, isoWeek, limitEndYear, disabledDate, showWeekNumbers } = this.props;
     const { calendarState, pageDate } = this.state;
     const calendarProps = _.pick(this.props, calendarOnlyProps);
 
@@ -350,7 +368,6 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
       <Calendar
         {...calendarProps}
         showWeekNumbers={showWeekNumbers}
-        showMeridian={showMeridian}
         disabledDate={disabledDate}
         limitEndYear={limitEndYear}
         format={format}
@@ -364,7 +381,6 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
         onToggleTimeDropdown={this.toggleTimeDropdown}
         onChangePageDate={this.handleChangePageDate}
         onChangePageTime={this.handleChangePageTime}
-        onToggleMeridian={this.handleToggleMeridian}
       />
     );
   }
@@ -413,11 +429,11 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
 
     if (inline) {
       return (
-        <IntlContext.Provider value={locale}>
+        <IntlProvider locale={locale}>
           <div className={classNames(classPrefix, this.addPrefix('date-inline'), className)}>
             {calendar}
           </div>
-        </IntlContext.Provider>
+        </IntlProvider>
       );
     }
 
@@ -426,13 +442,13 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
     });
 
     return (
-      <IntlContext.Provider value={locale}>
+      <IntlProvider locale={locale}>
         <div className={classes} style={style}>
           <PickerToggleTrigger
             pickerProps={this.props}
             ref={this.triggerRef}
             onEntered={createChainedFunction(this.handleEntered, onEntered)}
-            onExited={createChainedFunction(this.handleExit, onExited)}
+            onExit={createChainedFunction(this.handleExit, onExited)}
             speaker={this.renderDropdownMenu(calendar)}
           >
             <PickerToggle
@@ -447,13 +463,18 @@ class DatePicker extends React.Component<DatePickerProps, DatePickerState> {
             </PickerToggle>
           </PickerToggleTrigger>
         </div>
-      </IntlContext.Provider>
+      </IntlProvider>
     );
   }
 }
 
 polyfill(DatePicker);
 
-export default defaultProps({
-  classPrefix: 'picker'
-})(DatePicker);
+const enhance = compose(
+  defaultProps<DatePickerProps>({
+    classPrefix: 'picker'
+  }),
+  withPickerMethods<DatePickerProps>()
+);
+
+export default enhance(DatePicker);

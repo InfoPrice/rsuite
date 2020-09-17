@@ -1,39 +1,38 @@
 import * as React from 'react';
-import setDisplayName from 'recompose/setDisplayName';
-import wrapDisplayName from 'recompose/wrapDisplayName';
 import { getClassNamePrefix } from './prefix';
-import { StandardProps } from '../@types/common';
-import extendReactStatics from './extendReactStatics';
 
-export interface Props extends StandardProps {
+export interface Props {
+  classPrefix: string;
   componentClass?: React.ElementType;
 }
 
-function defaultProps<T>(props) {
+function defaultProps<T>(props: Props) {
   const { classPrefix, ...rest } = props;
 
-  return BaseComponent => {
-    const DefaultProps = React.forwardRef((ownerProps: T, ref: React.RefObject<any>) => {
-      return React.createElement(BaseComponent, {
-        ref,
-        ...ownerProps
-      });
-    });
+  return (WrappedComponent: React.ComponentClass<any>): React.ComponentClass<T> => {
+    class DefaultPropsComponent extends WrappedComponent {
+      // for IE9 & IE10 support
+      static contextTypes = WrappedComponent.contextTypes;
+      static childContextTypes = WrappedComponent.childContextTypes;
+      static getDerivedStateFromProps = WrappedComponent.getDerivedStateFromProps;
 
-    DefaultProps.displayName = BaseComponent.displayName;
-    DefaultProps.defaultProps = {
-      ...BaseComponent.defaultProps,
-      ...rest,
-      classPrefix: classPrefix ? `${getClassNamePrefix()}${classPrefix}` : undefined
-    };
+      static defaultProps: any = {
+        ...WrappedComponent.defaultProps,
+        classPrefix: classPrefix ? `${getClassNamePrefix()}${classPrefix}` : undefined,
+        ...rest
+      };
 
-    extendReactStatics(DefaultProps, BaseComponent);
-
-    if (process.env.RUN_ENV === 'test') {
-      return setDisplayName(wrapDisplayName(BaseComponent, '__test__'))(DefaultProps);
+      render() {
+        return super.render();
+      }
     }
 
-    return setDisplayName(wrapDisplayName(BaseComponent, 'defaultProps'))(DefaultProps);
+    // for IE9 & IE10 support
+    if (WrappedComponent.contextType) {
+      DefaultPropsComponent.contextType = WrappedComponent.contextType;
+    }
+
+    return DefaultPropsComponent;
   };
 }
 

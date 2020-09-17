@@ -13,7 +13,7 @@ export interface PaginationProps extends StandardProps, PaginationBaseProps {
   buttonComponentClass?: React.ElementType;
 
   /** callback function for pagination clicked */
-  onSelect?: (eventKey: any, event: React.MouseEvent) => void;
+  onSelect?: (event: React.SyntheticEvent<any>) => void;
 }
 
 declare const Pagination: React.ComponentType<PaginationProps>;

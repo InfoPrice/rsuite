@@ -1,15 +1,12 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import setDisplayName from 'recompose/setDisplayName';
-import wrapDisplayName from 'recompose/wrapDisplayName';
-import setPropTypes from 'recompose/setPropTypes';
+import { setPropTypes, wrapDisplayName } from 'recompose';
 
 import { TypeAttributes } from '../@types/common';
+
 import prefix from './prefix';
-import extendReactStatics from './extendReactStatics';
 import { SIZE, STATUS, COLOR } from '../constants';
-import refType from './refType';
 
 export interface RequiredProps {
   className?: string;
@@ -28,7 +25,7 @@ interface Options {
 }
 
 function withStyleProps<T>(options: Options = {}) {
-  return (BaseComponent): React.ComponentType<any> => {
+  return (Component: React.ComponentType<any>) => {
     const { hasSize, hasStatus, hasColor, defaultColor } = options;
 
     const WithStyleComponent = React.forwardRef((props: RequiredProps & T, ref: React.Ref<any>) => {
@@ -41,16 +38,11 @@ function withStyleProps<T>(options: Options = {}) {
         [addPrefix(status)]: hasStatus && status
       });
 
-      return React.createElement(BaseComponent, {
-        ...rest,
-        ref,
-        classPrefix,
-        className: classes
-      });
+      return <Component {...rest} classPrefix={classPrefix} className={classes} ref={ref} />;
     });
 
     const propTypes: any = {
-      innerRef: refType
+      innerRef: PropTypes.func
     };
 
     if (hasSize) {
@@ -65,14 +57,12 @@ function withStyleProps<T>(options: Options = {}) {
       propTypes.status = PropTypes.oneOf(STATUS);
     }
 
-    extendReactStatics(WithStyleComponent, BaseComponent);
+    WithStyleComponent.displayName = wrapDisplayName(Component, 'withStyleProps');
+    WithStyleComponent.defaultProps = Component.defaultProps;
+
     setPropTypes<any>(propTypes)(WithStyleComponent);
 
-    if (process.env.RUN_ENV === 'test') {
-      return setDisplayName(wrapDisplayName(BaseComponent, '__test__'))(WithStyleComponent);
-    }
-
-    return setDisplayName(wrapDisplayName(BaseComponent, 'withStyleProps'))(WithStyleComponent);
+    return WithStyleComponent;
   };
 }
 

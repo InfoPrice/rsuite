@@ -194,23 +194,40 @@ describe('DatePicker', () => {
   });
 
   it('Should call `onOpen` callback', done => {
-    const doneOp = () => {
+    const doneOp = key => {
       done();
     };
-    const picker = getInstance(<DatePicker onOpen={doneOp} />);
+    let picker = null;
+    getDOMNode(
+      <DatePicker
+        ref={ref => {
+          picker = ref;
+        }}
+        onOpen={doneOp}
+      />
+    );
+
     picker.open();
   });
 
   it('Should call `onClose` callback', done => {
-    const doneOp = () => {
+    const doneOp = key => {
       done();
     };
-    const picker = getInstance(<DatePicker defaultOpen onClose={doneOp} />);
+    let picker = null;
+    getDOMNode(
+      <DatePicker
+        defaultOpen
+        ref={ref => {
+          picker = ref;
+        }}
+        onClose={doneOp}
+      />
+    );
     picker.close();
   });
 
   it('Should not change for the value  when it is controlled', done => {
-    let instance = null;
     const doneOp = () => {
       if (
         getDOMNode(instance).querySelector('.rs-picker-toggle-value').innerText === '2018-01-05'
@@ -219,13 +236,13 @@ describe('DatePicker', () => {
       }
     };
 
-    instance = getInstance(
+    let instance = getInstance(
       <DatePicker value={parse('2018-01-05')} onChange={doneOp} defaultOpen />
     );
 
-    const allCells = instance.menuContainerRef.current.querySelectorAll('.rs-calendar-table-cell');
+    let allCell = instance.menuContainerRef.current.querySelectorAll('.rs-calendar-table-cell');
+    ReactTestUtils.Simulate.click(allCell[allCell.length - 1]);
 
-    ReactTestUtils.Simulate.click(allCells[allCells.length - 1]);
     ReactTestUtils.Simulate.click(
       instance.menuContainerRef.current.querySelector('.rs-picker-toolbar-right-btn-ok')
     );
@@ -270,26 +287,5 @@ describe('DatePicker', () => {
     );
 
     ReactTestUtils.Simulate.click(today);
-  });
-
-  it('Should be show meridian', () => {
-    const instance = getInstance(
-      <DatePicker
-        value={parse('2017-08-14 13:00:00')}
-        format="DD MMM YYYY hh:mm:ss A"
-        defaultOpen
-        showMeridian
-      />
-    );
-
-    const picker = instance.menuContainerRef.current;
-
-    assert.equal(picker.querySelector('.rs-calendar-header-meridian').innerText, 'PM');
-    assert.equal(picker.querySelector('.rs-calendar-header-title-time').innerText, '01:00:00');
-    assert.equal(
-      picker.querySelector('.rs-calendar-time-dropdown-column').querySelectorAll('li').length,
-      12
-    );
-    assert.equal(picker.querySelector('.rs-calendar-time-dropdown-column li').innerText, '12');
   });
 });

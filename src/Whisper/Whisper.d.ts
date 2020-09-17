@@ -1,26 +1,54 @@
 import * as React from 'react';
-import { TriggerProps } from '../Overlay/OverlayTrigger.d';
+import { AnimationEventProps, StandardProps, TypeAttributes } from '../@types/common';
 import { TooltipProps } from '../Tooltip/Tooltip.d';
 import { PopoverProps } from '../Popover/Popover.d';
 
-export interface WhisperProps extends TriggerProps {
-  /** display element */
-  speaker?:
-    | React.ReactElement<TooltipProps | PopoverProps>
-    | ((props: any, ref: React.RefObject<any>) => React.ReactElement);
+export type WhisperTrigger = 'click' | 'hover' | 'focus' | 'active';
 
-  /** @deprecated Use `ref` instead */
+export interface WhisperProps extends AnimationEventProps, StandardProps {
+  /** Triggering events */
+  trigger?: WhisperTrigger | WhisperTrigger[];
+
+  /** Ref of trigger */
   triggerRef?: React.Ref<any>;
-}
 
-export interface WhisperInstance extends React.Component<WhisperProps> {
-  open: (delay?: number) => void;
-  close: (delay?: number) => void;
+  /** Display placement */
+  placement?: TypeAttributes.Placement | TypeAttributes.Placement4;
 
-  /** @deprecated Use `open` instead */
-  show: (delay?: number) => void;
-  /** @deprecated Use `close` instead */
-  hide: (delay?: number) => void;
+  /** Delay Time */
+  delay?: number;
+
+  /** Show delay Time */
+  delayShow?: number;
+
+  /** Hidden delay Time */
+  delayHide?: number;
+
+  /** Sets the rendering container */
+  container?: HTMLElement | (() => HTMLElement);
+
+  /** display element */
+  speaker?: React.ReactElement<TooltipProps | PopoverProps>;
+
+  /**
+   * Prevent floating element overflow
+   */
+  preventOverflow?: boolean;
+
+  /** Show speaker */
+  open?: boolean;
+
+  /** Lose Focus callback function */
+  onBlur?: () => void;
+
+  /** Click on the callback function */
+  onClick?: () => void;
+
+  /** Callback function to get focus */
+  onFocus?: () => void;
+
+  /** Mouse leave callback function */
+  onMouseOut?: () => void;
 }
 
 declare const Whisper: React.ComponentType<WhisperProps>;

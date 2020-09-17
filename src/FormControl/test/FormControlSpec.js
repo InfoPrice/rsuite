@@ -50,20 +50,6 @@ describe('FormControl', () => {
     assert.ok(instance.querySelector('input[readonly]'));
   });
 
-  it('Should be readOnly on accepter', done => {
-    function Input(props) {
-      if (props && props.readOnly) {
-        done();
-      }
-      return <input {...props} />;
-    }
-    getDOMNode(
-      <Form>
-        <FormControl name="username" readOnly accepter={Input} />
-      </Form>
-    );
-  });
-
   it('Should call onBlur callback', done => {
     const doneOp = () => {
       done();

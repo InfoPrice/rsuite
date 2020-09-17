@@ -8,16 +8,8 @@ export interface IntlProviderProps {
   locale?: object;
 
   /** Support right-to-left */
-  rtl?: boolean;
 
-  /** Date Formatting API */
-  formatDate?: (
-    date: Date | string | number,
-    format?: string,
-    options?: {
-      locale?: object;
-    }
-  ) => string;
+  rtl?: boolean;
 }
 
 declare const IntlProvider: React.ComponentType<IntlProviderProps>;

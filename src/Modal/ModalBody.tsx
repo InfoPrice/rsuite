@@ -1,6 +1,7 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import setDisplayName from 'recompose/setDisplayName';
 
 import { defaultProps } from '../utils';
 import { ModalBodyProps } from './ModalBody.d';
@@ -26,6 +27,8 @@ class ModalBody extends React.Component<ModalBodyProps> {
   }
 }
 
-export default defaultProps({
+const EnhancedModalBody = defaultProps({
   classPrefix: 'modal-body'
 })(ModalBody);
+
+export default setDisplayName('ModalBody')(EnhancedModalBody);
