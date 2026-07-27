@@ -1,8 +1,16 @@
 import _ from 'lodash';
 import classNames from 'classnames';
 
-const getGlobal = new Function('return this;');
-const globals = getGlobal();
+// `new Function` exige 'unsafe-eval' na CSP e lanca EvalError no carregamento do
+// modulo quando a diretiva nao esta liberada, derrubando a aplicacao inteira.
+const globals: any =
+  typeof globalThis !== 'undefined'
+    ? globalThis
+    : typeof window !== 'undefined'
+    ? window
+    : typeof self !== 'undefined'
+    ? self
+    : {};
 
 export const globalKey = 'rs-';
 export const getClassNamePrefix = () => {
